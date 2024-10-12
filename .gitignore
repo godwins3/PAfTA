@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.log
+*.txt
+*.csv
+*.json
+*.xml
+*.db
+*.db-shm
+*.db-wal
+*.ini
+
+/tests/*
+string_generator.py

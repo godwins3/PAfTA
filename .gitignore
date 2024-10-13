@@ -8,6 +8,8 @@ __pycache__/
 *.db-shm
 *.db-wal
 *.ini
+*.env
+*.joblib
 
 /tests/*
 string_generator.py

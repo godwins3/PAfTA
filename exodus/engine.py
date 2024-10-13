@@ -4,6 +4,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from joblib import load
 import time
+from db.mongo_conn import create as create_mongo_conn
 
 print(f"INFO: [{str(datetime.now())}] Project Neon Initiated successfully")
 
@@ -80,9 +81,10 @@ def close_order(ticket, symbol, volume, price):
 
     return result
 
-# Initialize DataFrame to store trade outcomes
-columns = ['Order_Type', 'Volume', 'Open_Price', 'Close_Price', 'Stop_Loss', 'Take_Profit', 'Outcome', 'Profit_Loss', 'Trade_Open_Time', 'Trade_Close_Time', 'Duration']
-trades_log = pd.DataFrame(columns=columns)
+# Initialize MongoDB connection
+client = create_mongo_conn()
+db = client['trades']
+collection = db[symbol]
 
 # Start the trading loop
 start_time = datetime.now()
@@ -158,7 +160,7 @@ while datetime.now() < end_time:
             # Log the trade outcome
             trade_log = {
                 'Order_Type': 'Buy' if order_type == mt5.ORDER_TYPE_BUY else 'Sell',
-                'Margin': volume,
+                'Volume': volume,
                 'Open_Price': price,
                 'Close_Price': close_price,
                 'Stop_Loss': stop_loss,
@@ -167,13 +169,13 @@ while datetime.now() < end_time:
                 'Profit_Loss': profit_loss,
                 'Trade_Open_Time': trade_open_time,
                 'Trade_Close_Time': trade_close_time,
-                'Duration': trade_duration
+                'Duration': str(trade_duration)  # Convert timedelta to string for MongoDB
             }
-            # Use pd.concat to add the new trade log
-            trades_log = pd.concat([trades_log, pd.DataFrame([trade_log])], ignore_index=True)
+            # Insert the trade log into MongoDB
+            collection.insert_one(trade_log)
 
-# Save trades log to CSV
-trades_log.to_csv('trades_log_new_1.csv', index=False)
+# Close MongoDB connection
+client.close()
 
 # Shutdown MetaTrader 5
 print(f"INFO: [{str(datetime.now())}] Terminating mt5 server")

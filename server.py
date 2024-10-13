@@ -1,6 +1,7 @@
-from flask import Flask, jsonify
-from users.auth import login, signup
+from flask import Flask, jsonify, render_template, request
+from users.auth import login, signup, password_reset
 from middleware.service import token_required, log_request, handle_errors
+from exodus.engine import start_trading, stop_trading
 
 app = Flask(__name__)
 
@@ -23,6 +24,61 @@ def signup():
 @log_request
 def protected(current_user):
     return jsonify({"message": f"Hello, {current_user['name']}!", "statusCode": 200})
+
+@app.route('/api/v1/start_trading', methods=['POST'])
+@token_required
+@log_request
+def api_start_trading():
+    result = start_trading()
+    return jsonify({"message": result})
+
+@app.route('/api/v1/stop_trading', methods=['POST'])
+@token_required
+@log_request
+def api_stop_trading():
+    result = stop_trading()
+    return jsonify({"message": result})
+
+@app.route("/dashboard")
+@token_required
+@log_request
+def dashboard(current_user):
+    return render_template('dashboard/main.html')
+
+@app.route("/login")
+def login_page():
+    return render_template('auth/login.html')
+
+@app.route("/signup")
+def signup_page():
+    return render_template('auth/signup.html')
+
+@app.route("/forgot-password")
+def forgot_password_page():
+    return render_template('auth/forgot-password.html')
+
+@app.route("/reset-password")
+def reset_password_page():
+    return render_template('auth/reset-password.html')
+
+@app.route("/api/v1/request-password-reset", methods=["POST"])
+@log_request
+def request_password_reset():
+    data = request.get_json()
+    email = data.get('email')
+    if not email:
+        return jsonify({"Message": "Email is required", "statusCode": 400})
+    return jsonify(password_reset.request_password_reset(email))
+
+@app.route("/api/v1/reset-password", methods=["POST"])
+@log_request
+def reset_password():
+    data = request.get_json()
+    reset_token = data.get('reset_token')
+    new_password = data.get('new_password')
+    if not reset_token or not new_password:
+        return jsonify({"Message": "Reset token and new password are required", "statusCode": 400})
+    return jsonify(password_reset.reset_password(reset_token, new_password))
 
 handle_errors(app)
 

@@ -251,3 +251,30 @@ def user_code():
         if (any(c.islower() for c in password) and any(c.isupper()
                                                        for c in password) and sum(c.isdigit() for c in password) >= 8):
             return password.upper()
+
+def generate_password_reset_token(user_id):
+    try:
+        payload = {
+            'exp': datetime.utcnow() + timedelta(hours=1),
+            'iat': datetime.utcnow(),
+            'sub': user_id,
+            'type': 'password_reset'
+        }
+        return jwt.encode(
+            payload,
+            my_string,
+            algorithm='HS256'
+        )
+    except Exception as e:
+        return 0
+
+def verify_password_reset_token(token):
+    try:
+        payload = jwt.decode(token, my_string, algorithms=['HS256'])
+        if payload['type'] != 'password_reset':
+            return None
+        return payload['sub']
+    except jwt.ExpiredSignatureError:
+        return None
+    except jwt.InvalidTokenError:
+        return None

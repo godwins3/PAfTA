@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Exodus Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .trade-log {
+            height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">Project Exodus</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="startTradingBtn">Start Trading</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="stopTradingBtn">Stop Trading</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logoutBtn">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Account Information</div>
+                    <div class="card-body">
+                        <p><strong>Balance:</strong> $<span id="accountBalance">0.00</span></p>
+                        <p><strong>Equity:</strong> $<span id="accountEquity">0.00</span></p>
+                        <p><strong>Free Margin:</strong> $<span id="freeMargin">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Trading Statistics</div>
+                    <div class="card-body">
+                        <p><strong>Total Trades:</strong> <span id="totalTrades">0</span></p>
+                        <p><strong>Win Rate:</strong> <span id="winRate">0</span>%</p>
+                        <p><strong>Profit Factor:</strong> <span id="profitFactor">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">Current Position</div>
+                    <div class="card-body">
+                        <p><strong>Symbol:</strong> <span id="currentSymbol">-</span></p>
+                        <p><strong>Type:</strong> <span id="positionType">-</span></p>
+                        <p><strong>Profit/Loss:</strong> $<span id="currentPnL">0.00</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">Recent Trades</div>
+                    <div class="card-body trade-log" id="tradeLog">
+                        <!-- Trade log entries will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simulated data update (replace with actual API calls)
+        function updateDashboard() {
+            fetch('/api/v1/dashboard_data', {
+                headers: {
+                    'Authorization': 'Bearer ' + yourAuthToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('accountBalance').textContent = data.balance;
+                document.getElementById('accountEquity').textContent = data.equity;
+                document.getElementById('freeMargin').textContent = data.freeMargin;
+                document.getElementById('totalTrades').textContent = data.totalTrades;
+                document.getElementById('winRate').textContent = data.winRate;
+                document.getElementById('profitFactor').textContent = data.profitFactor;
+                document.getElementById('currentSymbol').textContent = data.currentSymbol;
+                document.getElementById('positionType').textContent = data.positionType;
+                document.getElementById('currentPnL').textContent = data.currentPnL;
+
+                // Update trade log
+                const tradeLog = document.getElementById('tradeLog');
+                tradeLog.innerHTML = data.recentTrades.map(trade => `
+                    <p><strong>${trade.date}</strong> - ${trade.symbol}: ${trade.type} ${trade.volume} lot at ${trade.openPrice}, closed at ${trade.closePrice}, ${trade.profitLoss}: $${trade.amount}</p>
+                `).join('');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Update dashboard every 5 seconds
+        setInterval(updateDashboard, 5000);
+
+        // Event listeners for buttons
+        document.getElementById('startTradingBtn').addEventListener('click', function() {
+            fetch('/api/v1/start_trading', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + yourAuthToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('stopTradingBtn').addEventListener('click', function() {
+            fetch('/api/v1/stop_trading', {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + yourAuthToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            alert('Logged out');
+            // Add logout functionality
+        });
+
+        // Check if user is logged in
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        });
+
+        // Add the token to all API requests
+        function fetchWithToken(url, options = {}) {
+            options.headers = options.headers || {};
+            options.headers['Authorization'] = `Bearer ${token}`;
+            return fetch(url, options);
+        }
+
+        // Use fetchWithToken instead of fetch for all API calls in dashboard.html
+    </script>
+</body>
+</html>

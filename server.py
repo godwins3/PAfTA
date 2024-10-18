@@ -2,12 +2,14 @@ from flask import Flask, jsonify, render_template, request
 from users.auth import login, signup, password_reset
 from middleware.service import token_required, log_request, handle_errors
 from exodus.engine import start_trading, stop_trading
+from neon.trades import fetch_trade_logs, fetch_trade_logs_by_timeframe
+from neon.engine import fetch_candlesticks_data
 
 app = Flask(__name__)
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def exodus():
-    return "<p>Hello, World!</p>"
+    return render_template('index.html')
 
 @app.route("/api/v1/login", methods=["POST"])
 @log_request
@@ -39,7 +41,7 @@ def api_stop_trading():
     result = stop_trading()
     return jsonify({"message": result})
 
-@app.route("/dashboard")
+@app.route("/dashboard", methods=["GET"])
 @token_required
 @log_request
 def dashboard(current_user):
@@ -79,6 +81,27 @@ def reset_password():
     if not reset_token or not new_password:
         return jsonify({"Message": "Reset token and new password are required", "statusCode": 400})
     return jsonify(password_reset.reset_password(reset_token, new_password))
+
+@app.route("/api/v1/get-trades", methods=['GET'])
+@token_required
+@log_request
+def get_trades():
+    return fetch_trade_logs()
+
+@app.route("/api/v1/get-trades-by-time", methods=['POST'])
+@token_required
+@log_request
+def get_trades_by_time():
+    data = request.get_json()
+    start_time = data.get('start_time')
+    end_time = data.get('end_time')
+    return fetch_trade_logs_by_timeframe(start_time, end_time)
+    
+@app.route("/api/v1/get-candlestick_data", methods=["POST"])
+@token_required
+@log_request
+def get_candlestick_data():
+    return fetch_candlesticks_data()
 
 handle_errors(app)
 

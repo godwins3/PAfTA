@@ -107,6 +107,14 @@
         </div>
     </div>
 
+    <div class="card mb-4">
+        <div class="card-header">Latest News</div>
+        <div class="card-body" id="news">
+            <!-- News articles will be dynamically added here -->
+            <p>No news available.</p>
+        </div>
+    </div
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Simulated data update (replace with actual API calls)
@@ -182,6 +190,7 @@
             fetchCandlestickData();
         }, 5000);
 
+
         // Event listeners for buttons
         document.getElementById('startTradingBtn').addEventListener('click', function() {
             fetch('/api/v1/start_trading', {
@@ -238,6 +247,89 @@
             options.headers['Authorization'] = `Bearer ${token}`;
             return fetch(url, options);
         }
+
+        function fetchAccountBalance() {
+            fetch('/api/v1/get-current-account-info')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('accountBalance').textContent = data.balance;
+                    document.getElementById('accountEquity').textContent = data.equity;
+                    document.getElementById('freeMargin').textContent = data.free_margin;
+                })
+                .catch(error => {
+                    console.error('Error fetching account balance:', error);
+                });
+        }
+
+        function fetchCurrentPositions() {
+            fetch('/api/v1/get-current-position')
+                .then(response => {
+                    if (!response.ok) {
+                        document.getElementById('positions').innerHTML = '<p>No open positions.</p>';
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const positionsContainer = document.getElementById('positions');
+                    positionsContainer.innerHTML = '';  // Clear previous positions
+                    data.forEach(position => {
+                        positionsContainer.innerHTML += `
+                            <p><strong>Symbol:</strong> ${position.symbol}, 
+                               <strong>Type:</strong> ${position.type === 0 ? 'Buy' : 'Sell'}, 
+                               <strong>Volume:</strong> ${position.volume}, 
+                               <strong>Open Price:</strong> ${position.price_open}, 
+                               <strong>Profit:</strong> ${position.profit}</p>
+                        `;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching current positions:', error);
+                });
+        }
+
+        function fetchNews() {
+            fetch('/api/v1/news')
+                .then(response => {
+                    if (!response.ok) {
+                        document.getElementById('news').innerHTML = '<p>No news available.</p>';
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const newsContainer = document.getElementById('news');
+                    newsContainer.innerHTML = '';  // Clear previous news
+                    data.forEach(article => {
+                        newsContainer.innerHTML += `
+                            <div class="mb-2">
+                                <h5>${article.title}</h5>
+                                <p>${article.description}</p>
+                                <small>${new Date(article.datetime * 1000).toLocaleString()} 
+                                <a href="${article.url}" target="_blank">Read more</a></small>
+                            </div>
+                        `;
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching news:', error);
+                });
+        }
+
+        // Fetch account balance, positions, and news on page load
+        fetchAccountBalance();
+        fetchCurrentPositions();
+        fetchNews();
+
+        // Refresh account balance, positions, and news on button clicks
+        document.getElementById('refreshAccountBtn').addEventListener('click', fetchAccountBalance);
+        document.getElementById('refreshPositionsBtn').addEventListener('click', fetchCurrentPositions);
+        document.getElementById('refreshNewsBtn').addEventListener('click', fetchNews);
 
         // Use fetchWithToken instead of fetch for all API calls in dashboard.html
     </script>

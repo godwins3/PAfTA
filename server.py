@@ -3,7 +3,7 @@ from users.auth import login, signup, password_reset
 from middleware.service import token_required, log_request, handle_errors
 from exodus.engine import start_trading, stop_trading
 from neon.trades import fetch_trade_logs, fetch_trade_logs_by_timeframe
-from neon.engine import fetch_candlestick_data
+from neon.engine import fetch_candlestick_data, fetch_current_account_info, fetch_current_position, fetch_news
 
 app = Flask(__name__)
 
@@ -118,6 +118,24 @@ def get_candlestick_data():
         return jsonify(data)
     else:
         return jsonify({'error': 'Failed to fetch data'}), 500
+    
+@app.route("/api/v1/get-current-position", methods=["GET"])
+@token_required
+@log_request
+def get_current_position():
+    return fetch_current_position()
+
+@app.route("/api/v1/get-current-account-info", methods=["GET"])
+@token_required
+@log_request
+def get_current_account_info():
+    return fetch_current_account_info()
+
+@app.route("/api/v1/news", methods=['GET'])
+@token_required
+@log_request
+def get_news():
+    return fetch_news()
 
 handle_errors(app)
 

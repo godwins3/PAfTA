@@ -2,6 +2,7 @@ import MetaTrader5 as mt5
 import pandas as pd
 from datetime import datetime
 from flask import jsonify
+from db.mongo_conn import create as create_mongo_conn
 
 def fetch_candlestick_data(symbol, timeframe, num_candles):
     if not mt5.initialize():
@@ -104,3 +105,47 @@ def fetch_news():
         return jsonify(news_data)
     else:
         return jsonify({'error': 'No news found'}), 404
+    
+def fetch_performance_data(current_user):
+    try:
+        # Fetch performance data from the database
+        client = create_mongo_conn()
+        db = client[current_user['db_name']]
+        trades_collection = db['trades']
+
+        # Calculate overall performance metrics
+        total_trades = trades_collection.count_documents({})
+        winning_trades = trades_collection.count_documents({'profit': {'$gt': 0}})
+        losing_trades = trades_collection.count_documents({'profit': {'$lt': 0}})
+
+        if total_trades > 0:
+            win_rate = (winning_trades / total_trades) * 100
+        else:
+            win_rate = 0
+
+        # Calculate total profit/loss
+        pipeline = [
+            {'$group': {'_id': None, 'total_profit': {'$sum': '$profit'}}}
+        ]
+        result = list(trades_collection.aggregate(pipeline))
+        total_profit = result[0]['total_profit'] if result else 0
+
+        # Get recent trades
+        recent_trades = list(trades_collection.find({}, {'_id': 0}).sort('close_time', -1).limit(10))
+
+        performance_data = {
+            'total_trades': total_trades,
+            'winning_trades': winning_trades,
+            'losing_trades': losing_trades,
+            'win_rate': round(win_rate, 2),
+            'total_profit': round(total_profit, 2),
+            'recent_trades': recent_trades
+        }
+
+        return jsonify({"data": performance_data, "message": "Performance data fetched successfully", "statusCode": 200})
+    except Exception as e:
+        return jsonify({"error": str(e), "message": "Failed to fetch performance data", "statusCode": 500}), 500
+    finally:
+        if 'client' in locals():
+            client.close()
+

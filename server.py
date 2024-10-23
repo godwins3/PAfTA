@@ -3,7 +3,7 @@ from users.auth import login, signup, password_reset
 from middleware.service import token_required, log_request, handle_errors
 from exodus.engine import start_trading, stop_trading
 from neon.trades import fetch_trade_logs, fetch_trade_logs_by_timeframe
-from neon.engine import fetch_candlestick_data, fetch_current_account_info, fetch_current_position, fetch_news
+from neon.engine import fetch_candlestick_data, fetch_current_account_info, fetch_current_position, fetch_news, fetch_performance_data
 
 app = Flask(__name__)
 
@@ -97,7 +97,7 @@ def get_trades_by_time():
     end_time = data.get('end_time')
     return fetch_trade_logs_by_timeframe(start_time, end_time)
     
-@app.route("/api/v1/get-candlestick-data", methods=["POST"])
+@app.route("/api/v1/get-candlestick-data", methods=["GET"])
 @token_required
 @log_request
 def get_candlestick_data():
@@ -137,6 +137,27 @@ def get_current_account_info():
 def get_news():
     return fetch_news()
 
+@app.route("/dashboard/settings")
+@token_required
+@log_request
+def settings_page(current_user):
+    return render_template('dashboard/settings.html')
+
+@app.route("/api/v1/update-settings", methods=["POST"])
+@token_required
+@log_request
+def update_settings(current_user):
+    data = request.get_json()
+    # Implement the logic to update user settings in the database
+    # Return appropriate response
+    return jsonify({"message": "Settings updated successfully", "statusCode": 200})
+
+@app.route("/api/v1/performance-data")
+@token_required
+@log_request
+def get_performance_data(current_user):
+    return fetch_performance_data(current_user)
+        
 handle_errors(app)
 
 if __name__ == "__main__":

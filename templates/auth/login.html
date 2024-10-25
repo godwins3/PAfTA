@@ -53,8 +53,10 @@
             .then(data => {
                 if (data.statusCode === 200) {
                     localStorage.setItem('token', data.token);
-                    window.location.href = 'dashboard.html';
+                    console.log(data)
+                    window.location.href = '/dashboard';
                 } else {
+                    console.log(data)
                     alert(data.Message);
                 }
             })

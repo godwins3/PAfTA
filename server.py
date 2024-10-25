@@ -1,11 +1,15 @@
 from flask import Flask, jsonify, render_template, request
-from users.auth import login, signup, password_reset
+from users.auth.signup import user_register
+from users.auth.login import login
+from users.auth.password_reset import reset_password, request_password_reset
 from middleware.service import token_required, log_request, handle_errors
-from exodus.engine import start_trading, stop_trading
+from exodus.engine import TradingEngine
 from neon.trades import fetch_trade_logs, fetch_trade_logs_by_timeframe
 from neon.engine import fetch_candlestick_data, fetch_current_account_info, fetch_current_position, fetch_news, fetch_performance_data
 
 app = Flask(__name__)
+
+trading_engine = TradingEngine()
 
 @app.route("/", methods=["GET"])
 def exodus():
@@ -13,13 +17,15 @@ def exodus():
 
 @app.route("/api/v1/login", methods=["POST"])
 @log_request
-def login():
-    return login.login()
+def user_login():
+    msg_received = request.get_json()
+    return login(msg_received)
 
 @app.route("/api/v1/signup", methods=["POST"])
 @log_request
 def signup():
-    return signup.signup()
+    msg_received = request.get_json()
+    return user_register(msg_received)
 
 @app.route("/api/v1/protected", methods=["GET"])
 @token_required
@@ -27,24 +33,25 @@ def signup():
 def protected(current_user):
     return jsonify({"message": f"Hello, {current_user['name']}!", "statusCode": 200})
 
-@app.route('/api/v1/start_trading', methods=['POST'])
-@token_required
+@app.route('/api/v1/start-trading', methods=['POST'])
+# @token_required
 @log_request
 def api_start_trading():
-    result = start_trading()
+    result = trading_engine.start()
     return jsonify({"message": result})
 
-@app.route('/api/v1/stop_trading', methods=['POST'])
-@token_required
+@app.route('/api/v1/stop-trading', methods=['POST'])
+# @token_required
 @log_request
 def api_stop_trading():
-    result = stop_trading()
+    result = trading_engine.stop()
     return jsonify({"message": result})
+    
 
 @app.route("/dashboard", methods=["GET"])
-@token_required
+# @token_required
 @log_request
-def dashboard(current_user):
+def dashboard():
     return render_template('dashboard/main.html')
 
 @app.route("/login")
@@ -65,12 +72,12 @@ def reset_password_page():
 
 @app.route("/api/v1/request-password-reset", methods=["POST"])
 @log_request
-def request_password_reset():
+def password_reset():
     data = request.get_json()
     email = data.get('email')
     if not email:
         return jsonify({"Message": "Email is required", "statusCode": 400})
-    return jsonify(password_reset.request_password_reset(email))
+    return jsonify(request_password_reset(email))
 
 @app.route("/api/v1/reset-password", methods=["POST"])
 @log_request
@@ -80,7 +87,7 @@ def reset_password():
     new_password = data.get('new_password')
     if not reset_token or not new_password:
         return jsonify({"Message": "Reset token and new password are required", "statusCode": 400})
-    return jsonify(password_reset.reset_password(reset_token, new_password))
+    return jsonify(reset_password(reset_token, new_password))
 
 @app.route("/api/v1/get-trades", methods=['GET'])
 @token_required
@@ -98,11 +105,11 @@ def get_trades_by_time():
     return fetch_trade_logs_by_timeframe(start_time, end_time)
     
 @app.route("/api/v1/get-candlestick-data", methods=["GET"])
-@token_required
+# @token_required
 @log_request
 def get_candlestick_data():
     symbol = "EURUSD"  # Change this to your desired symbol
-    timeframe = "H1"   # Change this to your desired timeframe
+    timeframe = "M1"   # Change this to your desired timeframe
     num_candles = 100  # Number of candlesticks to fetch
 
     df = fetch_candlestick_data(symbol, timeframe, num_candles)
@@ -140,16 +147,14 @@ def get_news():
 @app.route("/dashboard/settings")
 @token_required
 @log_request
-def settings_page(current_user):
+def settings_page():
     return render_template('dashboard/settings.html')
 
 @app.route("/api/v1/update-settings", methods=["POST"])
 @token_required
 @log_request
-def update_settings(current_user):
+def update_settings():
     data = request.get_json()
-    # Implement the logic to update user settings in the database
-    # Return appropriate response
     return jsonify({"message": "Settings updated successfully", "statusCode": 200})
 
 @app.route("/api/v1/performance-data")

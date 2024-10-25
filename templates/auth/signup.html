@@ -69,7 +69,8 @@
             .then(data => {
                 if (data.statusCode === 200) {
                     alert('Account created successfully. Please check your email for verification.');
-                    window.location.href = 'login.html';
+                    console.log(data)
+                    window.location.href = '/login';
                 } else {
                     alert(data.Message);
                 }

@@ -2,13 +2,13 @@ import json
 import re
 from db.mongo_conn import create as create_mongo_conn
 from tokenz.tokens import get_id
-
+ 
 
 def check_email(msg_received):
     email = str(msg_received["key"])
 
-    if email == '0':
-        return json.dumps({'phone': '0'})
+    # if email == '0':
+    #     return json.dumps({'phone': '0'})
 
     # Connect to MongoDB
     client = create_mongo_conn()

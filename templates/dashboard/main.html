@@ -50,10 +50,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="#" id="startTradingBtn">Start Trading</a>
+                        <button id="startTradingBtn">start trading</button>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" id="stopTradingBtn">Stop Trading</a>
+                        <button id="stopTradingBtn">stop trading</button>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="settings.html">Settings</a>
@@ -144,262 +144,126 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Simulated data update (replace with actual API calls)
-        function updateDashboard() {
-            fetch('/api/v1/dashboard_data', {
-                headers: {
-                    'Authorization': 'Bearer ' + yourAuthToken
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('accountBalance').textContent = data.balance;
-                document.getElementById('accountEquity').textContent = data.equity;
-                document.getElementById('freeMargin').textContent = data.freeMargin;
-                document.getElementById('totalTrades').textContent = data.totalTrades;
-                document.getElementById('winRate').textContent = data.winRate;
-                document.getElementById('profitFactor').textContent = data.profitFactor;
-                document.getElementById('currentSymbol').textContent = data.currentSymbol;
-                document.getElementById('positionType').textContent = data.positionType;
-                document.getElementById('currentPnL').textContent = data.currentPnL;
-
-                // Update trade log
-                const tradeLog = document.getElementById('tradeLog');
-                tradeLog.innerHTML = data.recentTrades.map(trade => `
-                    <p><strong>${trade.date}</strong> - ${trade.symbol}: ${trade.type} ${trade.volume} lot at ${trade.openPrice}, closed at ${trade.closePrice}, ${trade.profitLoss}: $${trade.amount}</p>
-                `).join('');
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        }
-
-        // Function to fetch candlestick data
-        function fetchCandlestickData() {
-            fetch('/api/v1/get-candlestick-data')
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.error) {
-                        const trace = {
-                            x: data.time,
-                            open: data.open,
-                            high: data.high,
-                            low: data.low,
-                            close: data.close,
-                            type: 'candlestick',
-                            name: 'Candlestick',
-                            showlegend: true
-                        };
-
-                        const layout = {
-                            title: 'Real-time Candlestick Chart',
-                            xaxis: {
-                                title: 'Time',
-                                type: 'date'
-                            },
-                            yaxis: {
-                                title: 'Price'
-                            }
-                        };
-
-                        // Use Plotly to create or update the chart
-                        Plotly.react('candlestickChart', [trace], layout);
-                    } else {
-                        console.error(data.error);
-                    }
-                })
-                .catch(error => console.error('Error fetching candlestick data:', error));
-        }
-
-        // Function to fetch performance data and update chart
-        function fetchPerformanceData() {
-            fetch('/api/v1/performance-data')
-                .then(response => response.json())
-                .then(data => {
-                    updatePerformanceChart(data);
-                })
-                .catch(error => console.error('Error fetching performance data:', error));
-        }
-
-        // Function to update performance chart
-        function updatePerformanceChart(data) {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: 'Account Balance',
-                        data: data.balances,
-                        borderColor: 'rgb(75, 192, 192)',
-                        tension: 0.1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: false
-                        }
-                    }
-                }
-            });
-        }
-
-        // Update dashboard and candlestick chart every 5 seconds
-        setInterval(() => {
-            updateDashboard();
-            fetchCandlestickData();
-            fetchPerformanceData();
-        }, 5000);
-
-
-        // Event listeners for buttons
-        document.getElementById('startTradingBtn').addEventListener('click', function() {
-            fetch('/api/v1/start_trading', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + yourAuthToken
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-
-        document.getElementById('stopTradingBtn').addEventListener('click', function() {
-            fetch('/api/v1/stop_trading', {
-                method: 'POST',
-                headers: {
-                    'Authorization': 'Bearer ' + yourAuthToken
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            alert('Logged out');
-            // Add logout functionality
-        });
-
-        // Check if user is logged in
         const token = localStorage.getItem('token');
+
         if (!token) {
             window.location.href = 'login.html';
         }
 
-        // Logout functionality
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            localStorage.removeItem('token');
-            window.location.href = 'login.html';
-        });
-
-        // Add the token to all API requests
         function fetchWithToken(url, options = {}) {
             options.headers = options.headers || {};
             options.headers['Authorization'] = `Bearer ${token}`;
             return fetch(url, options);
         }
 
-        function fetchAccountBalance() {
-            fetch('/api/v1/get-current-account-info')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+        function updateDashboard() {
+            fetchWithToken('/api/v1/dashboard_data')
+                .then(response => response.json())
                 .then(data => {
                     document.getElementById('accountBalance').textContent = data.balance;
                     document.getElementById('accountEquity').textContent = data.equity;
-                    document.getElementById('freeMargin').textContent = data.free_margin;
+                    document.getElementById('freeMargin').textContent = data.freeMargin;
+                    document.getElementById('totalTrades').textContent = data.totalTrades;
+                    document.getElementById('winRate').textContent = data.winRate;
+                    document.getElementById('profitFactor').textContent = data.profitFactor;
+                    document.getElementById('currentSymbol').textContent = data.currentSymbol;
+                    document.getElementById('positionType').textContent = data.positionType;
+                    document.getElementById('currentPnL').textContent = data.currentPnL;
+
+                    const tradeLog = document.getElementById('tradeLog');
+                    tradeLog.innerHTML = data.recentTrades.map(trade => `
+                        <p><strong>${trade.date}</strong> - ${trade.symbol}: ${trade.type} ${trade.volume} lot at ${trade.openPrice}, closed at ${trade.closePrice}, ${trade.profitLoss}: $${trade.amount}</p>
+                    `).join('');
                 })
-                .catch(error => {
-                    console.error('Error fetching account balance:', error);
-                });
+                .catch(error => console.error('Error:', error));
         }
 
-        function fetchCurrentPositions() {
-            fetch('/api/v1/get-current-position')
-                .then(response => {
-                    if (!response.ok) {
-                        document.getElementById('positions').innerHTML = '<p>No open positions.</p>';
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+        function fetchCandlestickData() {
+            fetchWithToken('/api/v1/get-candlestick-data')
+                .then(response => response.json())
                 .then(data => {
-                    const positionsContainer = document.getElementById('positions');
-                    positionsContainer.innerHTML = '';  // Clear previous positions
-                    data.forEach(position => {
-                        positionsContainer.innerHTML += `
-                            <p><strong>Symbol:</strong> ${position.symbol}, 
-                               <strong>Type:</strong> ${position.type === 0 ? 'Buy' : 'Sell'}, 
-                               <strong>Volume:</strong> ${position.volume}, 
-                               <strong>Open Price:</strong> ${position.price_open}, 
-                               <strong>Profit:</strong> ${position.profit}</p>
-                        `;
+                    if (!data || !data.time || data.time.length === 0) {
+                        console.warn('No candlestick data available');
+                        return;
+                    }
+
+                    const trace = {
+                        x: data.time,
+                        open: data.open.map(Number),  // Ensure values are numbers
+                        high: data.high.map(Number),  // Ensure values are numbers
+                        low: data.low.map(Number),    // Ensure values are numbers
+                        close: data.close.map(Number), // Ensure values are numbers
+                        type: 'candlestick',
+                        name: 'Candlestick Data',
+                        increasing: { line: { color: 'green' } },
+                        decreasing: { line: { color: 'red' } }
+                    };
+
+                    const layout = {
+                        title: 'Real-time Candlestick Chart',
+                        xaxis: { title: 'Time', type: 'date' },
+                        yaxis: { 
+                            title: 'Price', 
+                            autorange: true, // Automatically adjust range
+                        },
+                        dragmode: 'zoom',
+                        showlegend: false,
+                        margin: { t: 40, r: 10, b: 40, l: 40 },
+                    };
+
+                    Plotly.react('candlestickChart', [trace], layout);
+                })
+                .catch(error => console.error('Error fetching candlestick data:', error));
+        }
+
+
+        function fetchPerformanceData() {
+            fetchWithToken('/api/v1/performance-data')
+                .then(response => response.json())
+                .then(data => {
+                    const ctx = document.getElementById('performanceChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Account Balance',
+                                data: data.balances,
+                                borderColor: 'rgb(75, 192, 192)',
+                                tension: 0.1
+                            }]
+                        },
+                        options: { responsive: true }
                     });
                 })
-                .catch(error => {
-                    console.error('Error fetching current positions:', error);
-                });
+                .catch(error => console.error('Error fetching performance data:', error));
         }
 
-        function fetchNews() {
-            fetch('/api/v1/news')
-                .then(response => {
-                    if (!response.ok) {
-                        document.getElementById('news').innerHTML = '<p>No news available.</p>';
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const newsContainer = document.getElementById('news');
-                    newsContainer.innerHTML = '';  // Clear previous news
-                    data.forEach(article => {
-                        newsContainer.innerHTML += `
-                            <div class="mb-2">
-                                <h5>${article.title}</h5>
-                                <p>${article.description}</p>
-                                <small>${new Date(article.datetime * 1000).toLocaleString()} 
-                                <a href="${article.url}" target="_blank">Read more</a></small>
-                            </div>
-                        `;
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching news:', error);
-                });
-        }
+        setInterval(() => {
+            // updateDashboard();
+            fetchCandlestickData();
+            // fetchPerformanceData();
+        }, 5000);
 
-        // Fetch account balance, positions, and news on page load
-        fetchAccountBalance();
-        fetchCurrentPositions();
-        fetchNews();
-
-        // Refresh account balance, positions, and news on button clicks
-        document.getElementById('refreshAccountBtn').addEventListener('click', fetchAccountBalance);
-        document.getElementById('refreshPositionsBtn').addEventListener('click', fetchCurrentPositions);
-        document.getElementById('refreshNewsBtn').addEventListener('click', fetchNews);
-
-        // Use fetchWithToken instead of fetch for all API calls in dashboard.html
-
-        // Dark mode toggle
-        document.getElementById('darkModeToggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark-mode');
+        document.getElementById('startTradingBtn').addEventListener('click', () => {
+            fetchWithToken('/api/v1/start-trading', { method: 'POST' });
         });
+
+        document.getElementById('stopTradingBtn').addEventListener('click', () => {
+            fetchWithToken('/api/v1/stop-trading', { method: 'POST' });
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            document.querySelectorAll('.card').forEach(card => card.classList.toggle('dark-mode'));
+            document.querySelector('.navbar').classList.toggle('dark-mode');
+        }
+        document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
     </script>
 </body>
 </html>

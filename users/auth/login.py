@@ -23,7 +23,7 @@ def login(msg_received):
         if user:
             user_id = str(user['_id'])
             locator = str(user.get('locator', ''))
-            hashed_password = user['password'].encode('utf8')
+            hashed_password = user['password']
 
             if bcrypt.checkpw(plain_password, hashed_password):
                 tkn = str(tokens.generate_token(user_id, locator))

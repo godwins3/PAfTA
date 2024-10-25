@@ -57,7 +57,6 @@ def secret_config(filename=os.path.dirname(os.path.abspath(__file__)) + '/files/
     parser = ConfigParser()
     parser.read(filename)
 
-    # get section, default to mysql
     db = {}
     if parser.has_section(section):
         items = parser.items(section)

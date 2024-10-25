@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>JavaScript Candlestick Chart</title>
+    <link href="https://cdn.anychart.com/releases/8.11.0/css/anychart-ui.min.css" rel="stylesheet" type="text/css">
+    <link href="https://cdn.anychart.com/releases/8.11.0/fonts/css/anychart-font.min.css" rel="stylesheet" type="text/css">  
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-core.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-stock.min.js"></script>
+    <script src="https://cdn.anychart.com/releases/8.11.0/js/anychart-data-adapter.min.js"></script>
+    <style type="text/css">
+      html,
+      body,
+      #container {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script>
+anychart.onDocumentReady(function () {
+  // load data
+  anychart.data.loadCsvFile(
+'https://gist.githubusercontent.com/awanshrestha/6481638c175e82dc6a91a499a8730057/raw/1791ef1f55f0be268479286284a0452129371003/TSMC.csv',
+    function (data) {
+      // create a data table with the loaded data
+      var dataTable = anychart.data.table();
+      dataTable.addData(data);
+      // map the loaded data for the candlestick series
+      var mapping = dataTable.mapAs({
+        open: 1,
+        high: 2,
+        low: 3,
+        close: 4
+      });
+      // create a stock chart
+      var chart = anychart.stock();
+      // create the chart plot
+      var plot = chart.plot(0);
+      // set the grid settings
+      plot
+        .yGrid(true)
+        .xGrid(true)
+        .yMinorGrid(true)
+        .xMinorGrid(true);
+      // create the candlestick series
+      var series = plot.candlestick(mapping);
+      series.name('TSMC');
+      series.legendItem().iconType('rising-falling');
+      // set the title of the chart
+      chart.title('TSMC Stock Chart');
+      // set the container id for the chart
+      chart.container('container');
+      // initiate the chart drawing
+      chart.draw();
+    }
+  );
+});
+    </script>
+  </body>
+</html>

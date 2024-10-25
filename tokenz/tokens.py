@@ -63,12 +63,6 @@ def quick_gen(the_token):
     except Exception as e:
         return e
 
-from datetime import datetime, timedelta
-import jwt
-from tokenz import secret_config
-from tokenz import tokens
-
-
 def generate_registration_token(form: str, key: str):
     try:
         the_key = secret_config.secret_config(section='reg_token')

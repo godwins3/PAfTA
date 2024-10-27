@@ -2,9 +2,9 @@ Flask==3.0.3
 joblib==1.2.0
 MetaTrader5==5.0.4424
 numpy==2.1.2
-pandas==2.2.3
-PyJWT==2.9.0
+pandas==2.1.4
+PyJWT==2.4.0
 pymongo==4.10.1
-python_bcrypt==0.3.2
-Requests==2.32.3
+bcrypt==4.2.0
+Requests==2.31.0
 twilio==9.3.3

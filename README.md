@@ -106,4 +106,4 @@ This software is for educational purposes only. Trading forex carries a high lev
 
 ## License
 
-[Specify your license here]
+[MIT]

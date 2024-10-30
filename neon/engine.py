@@ -1,4 +1,4 @@
-import MetaTrader5 as mt5
+from mt5 import MetaTrader5 as mt5
 import pandas as pd
 from datetime import datetime
 from flask import jsonify

@@ -62,6 +62,54 @@ Project Exodus is a sophisticated backend engine for an advanced forex trading a
 
 5. Configure your forex data feed API keys and other settings in `config/config.py`.
 
+### Easy way is using docker make sure to have docker runing on your machine
+
+```bash
+docker volume create ejtraderMT
+docker run -d --restart=always -p 5900:5900 -p 15555:15555 -p 15556:15556 -p 15557:15557 -p 15558:15558 --name ejtraderMT -v ejtraderMT:/data ejtrader/metatrader:5
+
+```
+
+or docker compose
+
+```yml
+version: '3.8'
+services:
+  app:
+    container_name: metatrader
+    image: ejtrader/metatrader:5
+    restart: unless-stopped
+    ports:
+      - '5900:5900'
+      - '15555:15555'
+      - '15556:15556'
+      - '15557:15557'
+      - '15558:15558'
+    volumes:
+      - ejtraderMT:/data
+ 
+      
+volumes:
+  ejtraderMT: {}
+```
+
+Dockerfile and source for Docker wine vnc [github](https://github.com/ejtraderLabs/Metatrader5-Docker)
+
+#### Access Metatrader 5 via VNC
+
+download VNC VIEWER  or any other vnc client of your preference: [Download](https://www.realvnc.com/connect/download/viewer/)
+
+```bash
+username: root
+password: root
+```
+
+#### harder way installing direct to your Metatrader 5 on Windows Machine
+
+First download MQL5 source code and install it on the Metatrader 5 [github](https://github.com/ejtraderLabs/MQL5-ejtraderMT)
+
+second download and install Microsoft Visual C++ 2015 [Download](https://www.microsoft.com/pt-br/download/details.aspx?id=52685)
+
 ## Usage
 
 1. Start the main engine and web server:

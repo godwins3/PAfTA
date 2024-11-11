@@ -23,4 +23,4 @@ COPY . .
 EXPOSE 8000
 
 # Command to run the application within the virtual environment
-CMD ["./venv/bin/python", "server.py"]
+CMD ["./venv/bin/python", "wsgi.py"]

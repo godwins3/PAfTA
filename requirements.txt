@@ -1,7 +1,5 @@
 Flask==3.0.3
 joblib==1.2.0
-# MetaTrader5==5.0.4424
-# mt5linux==0.1.9
 numpy
 pandas
 PyJWT==2.4.0
@@ -9,8 +7,3 @@ pymongo==4.10.1
 bcrypt==4.2.0
 Requests==2.31.0
 twilio==9.3.3
-
-# mt5 dependencies
-plumbum==1.7.0
-pyparsing==2.4.7
-rpyc==5.2.3

@@ -16,7 +16,7 @@ import logging
 import sys
 import warnings
 
-# Configuração do logger
+# Configure logger
 LOGGER = {
     "datefmt": "%Y-%m-%d %H:%M:%S",
     "format": (
@@ -670,7 +670,7 @@ class Metatrader:
                             )
                             attempts += 1
                     if attempts == 5 and not success:
-                        logging.info(f"Check if {active} is avalible from {fromDate}")
+                        logging.info(f"Check if {active} is available from {fromDate}")
                         pass
 
                     if data is not None and isinstance(data, dict):
@@ -721,7 +721,7 @@ class Metatrader:
                             )
                             attempts += 1
                     if attempts == 2 and not success:
-                        logging.info(f"Check if {active} is avalible from {fromDate}")
+                        logging.info(f"Check if {active} is available from {fromDate}")
                         pass
 
                     if data is not None and isinstance(data, dict):

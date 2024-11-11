@@ -1,0 +1,25 @@
+{
+    "cSpell.words": [
+        "allchart",
+        "allsymbol",
+        "brocker",
+        "brokertime",
+        "datestamp",
+        "dbhost",
+        "dbpass",
+        "dbport",
+        "dbtype",
+        "dbuser",
+        "ejtrader",
+        "EURUSD",
+        "localzone",
+        "mktime",
+        "msecs",
+        "pbar",
+        "RCVTIMEO",
+        "stoploss",
+        "takeprofit",
+        "TIMECANDLE",
+        "tzlocal"
+    ]
+}

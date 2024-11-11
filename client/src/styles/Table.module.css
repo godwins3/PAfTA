@@ -1,0 +1,12 @@
+.tableClass {
+    width: 100%;
+    border: 1px solid rgb(196, 195, 195);
+    text-align: left;
+}
+
+.thtd {
+    border: 1px solid rgb(196, 195, 195);
+    text-align: left;
+    padding: 15px;
+}
+

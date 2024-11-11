@@ -1,7 +1,6 @@
 __pycache__/
 *.pyc
 *.log
-*.csv
 *.json
 *.xml
 *.db
@@ -13,3 +12,5 @@ __pycache__/
 
 /tests/*
 string_generator.py
+loc.py
+app.log

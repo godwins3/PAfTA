@@ -1,0 +1,2 @@
+time,symbol,action,lot,price,sl_price,tp_price,result,retcode,profit,volume
+2024-10-17 11:55:37.000538,EURUSD,SELL,10.0,1.08498,1.08528,1.08488,success,10009,,

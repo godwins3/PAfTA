@@ -10,7 +10,7 @@ if not mt5.initialize():
 # Define symbol and timeframe
 symbol = "EURUSD"
 timeframe = mt5.TIMEFRAME_M1  # M1 timeframe
-start_date = datetime.now() - timedelta(days=7)  # Fetch data from the last 7 days
+start_date = datetime.now() - timedelta(days=30)  # Fetch data from the last 7 days
 end_date = datetime.now()
 
 # Request historical data

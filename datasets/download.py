@@ -10,7 +10,7 @@ if not mt5.initialize():
 # Define symbol and timeframe
 symbol = "EURUSD"
 timeframe = mt5.TIMEFRAME_M1  # M1 timeframe
-start_date = datetime.now() - timedelta(days=30)  # Fetch data from the last 7 days
+start_date = datetime.now() - timedelta(days=69)  # Fetch data from the last 7 days
 end_date = datetime.now()
 
 # Request historical data
@@ -29,7 +29,7 @@ df['time'] = pd.to_datetime(df['time'], unit='s')  # Convert time to datetime
 df = df[['time', 'open', 'high', 'low', 'close', 'tick_volume']]  # Select desired columns
 
 # Save to CSV
-csv_file = f"{symbol}_M1_data.csv"
+csv_file = f"{symbol}_M1_data_69_days.csv"
 df.to_csv(csv_file, index=False)
 print(f"Data saved to {csv_file}")
 
